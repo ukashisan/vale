@@ -3,7 +3,7 @@
 // reload, then reopen and play with the network offline.
 // Usage: node scripts/smoke-test.mjs
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -28,6 +28,16 @@ const server = createServer(async (req, res) => {
 const url = 'http://localhost:' + server.address().port + '/';
 
 const fail = msg => { throw new Error(msg); };
+
+// Every template file must be in the service worker's offline cache list.
+const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');
+const templateIds = await readdir(join(ROOT, 'templates'));
+for (const id of templateIds) {
+  const m = JSON.parse(await readFile(join(ROOT, 'templates', id, 'manifest.json'), 'utf8'));
+  for (const f of ['manifest.json', ...m.files, ...m.assets]) {
+    if (!sw.includes("'templates/" + id + '/' + f + "'")) fail('sw.js does not cache templates/' + id + '/' + f);
+  }
+}
 const browser = await chromium.launch();
 const context = await browser.newContext({ ...devices['iPhone 13'] });
 const page = await context.newPage();
@@ -85,6 +95,30 @@ try {
   if (best !== 4242) fail('save data not restored, got ' + best);
   if (await page.isVisible('#error')) fail('offline game error: ' + await page.textContent('#error-text'));
   await page.screenshot({ path: process.env.SCREENSHOT || 'smoke-test.png' });
+  await page.click('#close-btn');
+
+  // Create and play every template, still offline.
+  for (const id of templateIds) {
+    await page.click('#new-btn');
+    await page.fill('#new-name', 'T ' + id);
+    await page.check('input[name=template][value="' + id + '"]');
+    await page.click('dialog button[value=ok]');
+    await frame.locator('canvas').waitFor({ timeout: 10000 });
+    const b = await page.locator('.game-frame').boundingBox();
+    // Taps across the screen, then hold the lower-left (platformer's move button) and lower-right.
+    for (const [fx, fy] of [[0.5, 0.5], [0.5, 0.3], [0.1, 0.9], [0.8, 0.9]]) {
+      await page.touchscreen.tap(b.x + b.width * fx, b.y + b.height * fy);
+      await page.waitForTimeout(250);
+    }
+    await page.mouse.move(b.x + b.width * 0.4, b.y + b.height * 0.9);
+    await page.mouse.down();
+    await page.waitForTimeout(800);
+    await page.mouse.up();
+    await page.waitForTimeout(1000);
+    if (await page.isVisible('#error')) fail(id + ': ' + await page.textContent('#error-text'));
+    if (process.env.SCREENSHOT) await page.screenshot({ path: process.env.SCREENSHOT.replace('.png', '-' + id + '.png') });
+    await page.click('#close-btn');
+  }
   if (errors.length) fail('page errors: ' + errors.join('; '));
   console.log('smoke test passed');
 } finally {

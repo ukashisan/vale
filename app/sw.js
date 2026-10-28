@@ -1,12 +1,15 @@
 // Offline cache for the web build. The iOS shell serves files from the app
 // bundle and does not use this.
-const CACHE = 'vale-maker-v1';
+const CACHE = 'vale-maker-v2';
 const FILES = [
   './', 'index.html', 'app.css', 'manifest.webmanifest', 'icon.png',
   'js/main.js', 'js/storage.js', 'js/projects.js', 'js/player.js',
   'vendor/phaser-3.90.0.min.js',
   'templates/space-shooter/manifest.json', 'templates/space-shooter/game.js',
-  'templates/space-shooter/ship.svg', 'templates/space-shooter/enemy.svg'
+  'templates/space-shooter/ship.svg', 'templates/space-shooter/enemy.svg',
+  'templates/platformer/manifest.json', 'templates/platformer/levels.js', 'templates/platformer/game.js',
+  'templates/brick-breaker/manifest.json', 'templates/brick-breaker/game.js',
+  'templates/sky-hopper/manifest.json', 'templates/sky-hopper/game.js'
 ];
 
 self.addEventListener('install', e => {
