@@ -10,7 +10,10 @@
 
 export const SCHEMA_VERSION = 1;
 export const TEMPLATES = [
-  { id: 'space-shooter', name: 'Space Shooter', blurb: 'Top-down shooter. Drag to steer, auto-fire.' }
+  { id: 'space-shooter', name: 'Space Shooter', blurb: 'Top-down shooter. Drag to steer, auto-fire.' },
+  { id: 'platformer', name: 'Platformer', blurb: 'Run and jump through three levels. On-screen buttons.' },
+  { id: 'brick-breaker', name: 'Brick Breaker', blurb: 'Drag the paddle, clear the bricks. Gets faster each level.' },
+  { id: 'sky-hopper', name: 'Sky Hopper', blurb: 'One-tap flyer. Flap through the gaps.' }
 ];
 
 const PATH_RE = /^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,63}$/;

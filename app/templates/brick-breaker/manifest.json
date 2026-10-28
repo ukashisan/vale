@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Brick Breaker",
+  "template": "brick-breaker",
+  "engine": "phaser@3.90.0",
+  "entry": "game.js",
+  "files": ["game.js"],
+  "assets": [],
+  "orientation": "portrait"
+}
